@@ -1,19 +1,40 @@
-# Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+# Function to resolve script with node to allow for hoisting
+def node_require(script)
+  require Pod::Executable.execute_command('node', ['-p',
+    "require.resolve(
+      '#{script}',
+      {paths: [process.argv[1]]},
+    )", __dir__]).strip
+end
 
+# Resolving necessary scripts
+node_require('react-native/scripts/react_native_pods.rb')
+node_require('react-native-permissions/scripts/setup.rb')
+
+# Define platform and minimum iOS version
 platform :ios, min_ios_version_supported
+
+# Prepare the React Native project
 prepare_react_native_project!
 
+# Setup permissions
+setup_permissions([
+  'Camera',
+  'FaceID',
+  'MediaLibrary',
+  'Microphone',
+  'Notifications',
+  'PhotoLibrary',
+])
+
+# Handle framework linkage if specified
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
   Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
   use_frameworks! :linkage => linkage.to_sym
 end
 
+# Main target configuration
 target 'PolestarApp' do
   config = use_native_modules!
 
@@ -23,13 +44,15 @@ target 'PolestarApp' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Testing target configuration
   target 'PolestarAppTests' do
     inherit! :complete
     # Pods for testing
   end
 
+  # Post-install hook to run additional configuration steps
   post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
+    # Reference to React Native's post-install script
     react_native_post_install(
       installer,
       config[:reactNativePath],
