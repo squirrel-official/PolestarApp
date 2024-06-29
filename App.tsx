@@ -2,8 +2,8 @@ import 'react-native-gesture-handler';
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import PersonHomeScreen from './components/PersonHomeScreen';
-import VehicleHomeScreen from './components/VehicleHomeScreen';
+import PersonHomeScreen from './components/person/PersonHomeScreen';
+import VehicleHomeScreen from './components/vehicle/VehicleHomeScreen';
 import DashboardScreen from './components/DashboardScreen';
 
 const Tab = createBottomTabNavigator();
